@@ -61,15 +61,10 @@ namespace BTL_LTTQ.BLL
         }
 
         public bool KiemTraMaPCTrung(string maPC) => dal.KiemTraMaPCTrung(maPC);
-
-        // ✅ ĐÚNG: Dùng byte
         public bool KiemTraTrungLichGV(string maGV, DateTime? ngayBD, DateTime? ngayKT, byte thu, byte caHoc, string maPC = null)
             => dal.KiemTraTrungLichGV(maGV, ngayBD, ngayKT, thu, caHoc, maPC);
-
-        // ✅ ĐÚNG: Dùng byte
         public bool KiemTraTrungPhong(string maPhong, DateTime? ngayBD, DateTime? ngayKT, byte thu, byte caHoc, string maPC = null)
             => dal.KiemTraTrungPhong(maPhong, ngayBD, ngayKT, thu, caHoc, maPC);
-
         public bool KiemTraLopDaPhanCong(string maLop) => dal.KiemTraLopDaPhanCong(maLop);
 
         // === CÁC PHƯƠNG THỨC HỖ TRỢ ===
@@ -109,25 +104,31 @@ namespace BTL_LTTQ.BLL
             return DatabaseConnection.ExecuteQuery(query);
         }
 
-        // ✅ SỬA: TinhTrang → TinhTrangLop
+        // ✅ SỬA: Tạo TenLop từ MaLop + TenMH
         public DataTable LayLopTinChiChuaPhanCong(string maMH)
         {
             string query = @"
-                SELECT ltc.MaLop, ltc.TenLop 
+                SELECT ltc.MaLop, 
+                       ltc.MaLop + ' - ' + mh.TenMH AS TenLop
                 FROM LopTinChi ltc
+                INNER JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
                 WHERE ltc.MaMH = @MaMH
-                  AND ltc.TinhTrangLop = 0";
+                  AND ltc.TinhTrangLop = 0
+                ORDER BY ltc.MaLop";
             return DatabaseConnection.ExecuteQuery(query, new[] { new SqlParameter("@MaMH", maMH) });
         }
 
-        // ✅ SỬA: TinhTrang → TinhTrangLop
+        // ✅ SỬA: Tạo TenLop từ MaLop + TenMH
         public DataTable LayLopTinChiDaPhanCong(string maMH)
         {
             string query = @"
-                SELECT ltc.MaLop, ltc.TenLop 
+                SELECT ltc.MaLop, 
+                       ltc.MaLop + ' - ' + mh.TenMH AS TenLop
                 FROM LopTinChi ltc
+                INNER JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
                 WHERE ltc.MaMH = @MaMH
-                  AND ltc.TinhTrangLop = 1";
+                  AND ltc.TinhTrangLop = 1
+                ORDER BY ltc.MaLop";
             return DatabaseConnection.ExecuteQuery(query, new[] { new SqlParameter("@MaMH", maMH) });
         }
     }

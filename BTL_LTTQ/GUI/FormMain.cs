@@ -119,7 +119,7 @@ private void ConfigureAccessByRole()
         panelKhoi.Visible = true;
         panelKhoi3.Visible = true;
 
-        panelKhoi.Location = new System.Drawing.Point(0, 146);
+        panelKhoi.Location = new System.Drawing.Point(0, 135);
         panelKhoi3.Location = new System.Drawing.Point(0, 197);
         panelKhoi4.Location = new System.Drawing.Point(0, 249);
         panelKhoi5.Location = new System.Drawing.Point(0, 299);
@@ -147,6 +147,11 @@ private void ConfigureAccessByRole()
         }
 
         private void lblUserInfo_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
         }

@@ -8,6 +8,7 @@ namespace BTL_LTTQ.DAL
 {
     public class PhanCongDAL
     {
+        // ✅ SỬA: Tạo TenLop từ MaLop + TenMH
         public DataTable LayTatCa()
         {
             string query = @"
@@ -15,12 +16,17 @@ namespace BTL_LTTQ.DAL
                     pc.MaPC, pc.NgayPC, pc.NgayBatDau, pc.NgayKetThuc,
                     pc.CaHoc, pc.Thu,
                     pc.MaPhong AS Phong, kv.TenKhuVuc AS Toa,
-                    gv.MaGV, gv.TenGV, ltc.MaLop, ltc.TenLop, ltc.MaMH, ltc.NamHoc
+                    gv.MaGV, gv.TenGV, 
+                    ltc.MaLop, 
+                    ltc.MaLop + ' - ' + mh.TenMH AS TenLop,
+                    ltc.MaMH, ltc.NamHoc
                 FROM PhanCongGiangDay pc
                 INNER JOIN PhongHoc ph ON pc.MaPhong = ph.MaPhong
                 INNER JOIN KhuVuc kv ON ph.MaKhuVuc = kv.MaKhuVuc
                 INNER JOIN GiangVien gv ON pc.MaGV = gv.MaGV
-                INNER JOIN LopTinChi ltc ON pc.MaLop = ltc.MaLop";
+                INNER JOIN LopTinChi ltc ON pc.MaLop = ltc.MaLop
+                INNER JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
+                ORDER BY pc.MaPC";
 
             return DatabaseConnection.ExecuteQuery(query);
         }

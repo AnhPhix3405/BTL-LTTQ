@@ -29,8 +29,6 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cáchSửDụngToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panelKhoi2 = new System.Windows.Forms.Panel();
             this.panelDiem = new System.Windows.Forms.Panel();
             this.label2 = new System.Windows.Forms.Label();
@@ -42,10 +40,6 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.accountToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.báoCáoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel9 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -71,17 +65,16 @@
             this.lblUserInfo = new System.Windows.Forms.Label();
             this.panelKhoi7 = new System.Windows.Forms.Panel();
             this.panelSchedule = new System.Windows.Forms.Panel();
+            this.pictureBox7 = new System.Windows.Forms.PictureBox();
             this.label7 = new System.Windows.Forms.Label();
             this.panel17 = new System.Windows.Forms.Panel();
             this.panelMain = new System.Windows.Forms.Panel();
-            this.pictureBox7 = new System.Windows.Forms.PictureBox();
             this.panelKhoi2.SuspendLayout();
             this.panelDiem.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.panelKhoi.SuspendLayout();
             this.panelGiangVien.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.menuStrip1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panelKhoi6.SuspendLayout();
             this.panelSinhVien.SuspendLayout();
@@ -99,21 +92,6 @@
             this.panelSchedule.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).BeginInit();
             this.SuspendLayout();
-            // 
-            // helpToolStripMenuItem
-            // 
-            this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cáchSửDụngToolStripMenuItem});
-            this.helpToolStripMenuItem.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(59, 27);
-            this.helpToolStripMenuItem.Text = "Help";
-            // 
-            // cáchSửDụngToolStripMenuItem
-            // 
-            this.cáchSửDụngToolStripMenuItem.Name = "cáchSửDụngToolStripMenuItem";
-            this.cáchSửDụngToolStripMenuItem.Size = new System.Drawing.Size(199, 28);
-            this.cáchSửDụngToolStripMenuItem.Text = "Cách sử dụng";
             // 
             // panelKhoi2
             // 
@@ -240,43 +218,6 @@
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(309, 95);
             this.panel3.TabIndex = 2;
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(3)))), ((int)(((byte)(65)))), ((int)(((byte)(252)))));
-            this.menuStrip1.Font = new System.Drawing.Font("Segoe UI", 10F);
-            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.accountToolStripMenuItem,
-            this.báoCáoToolStripMenuItem,
-            this.helpToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(309, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1518, 31);
-            this.menuStrip1.TabIndex = 3;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // fileToolStripMenuItem
-            // 
-            this.fileToolStripMenuItem.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(49, 27);
-            this.fileToolStripMenuItem.Text = "File";
-            // 
-            // accountToolStripMenuItem
-            // 
-            this.accountToolStripMenuItem.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.accountToolStripMenuItem.Name = "accountToolStripMenuItem";
-            this.accountToolStripMenuItem.Size = new System.Drawing.Size(87, 27);
-            this.accountToolStripMenuItem.Text = "Account";
-            // 
-            // báoCáoToolStripMenuItem
-            // 
-            this.báoCáoToolStripMenuItem.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.báoCáoToolStripMenuItem.Name = "báoCáoToolStripMenuItem";
-            this.báoCáoToolStripMenuItem.Size = new System.Drawing.Size(88, 27);
-            this.báoCáoToolStripMenuItem.Text = "Báo Cáo";
             // 
             // panel9
             // 
@@ -567,6 +508,18 @@
             this.panelSchedule.Size = new System.Drawing.Size(309, 49);
             this.panelSchedule.TabIndex = 3;
             // 
+            // pictureBox7
+            // 
+            this.pictureBox7.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox7.BackgroundImage")));
+            this.pictureBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.pictureBox7.Dock = System.Windows.Forms.DockStyle.Left;
+            this.pictureBox7.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBox7.Name = "pictureBox7";
+            this.pictureBox7.Size = new System.Drawing.Size(64, 49);
+            this.pictureBox7.TabIndex = 2;
+            this.pictureBox7.TabStop = false;
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -592,22 +545,10 @@
             // panelMain
             // 
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelMain.Location = new System.Drawing.Point(309, 31);
+            this.panelMain.Location = new System.Drawing.Point(309, 0);
             this.panelMain.Name = "panelMain";
-            this.panelMain.Size = new System.Drawing.Size(1518, 709);
+            this.panelMain.Size = new System.Drawing.Size(1518, 740);
             this.panelMain.TabIndex = 4;
-            // 
-            // pictureBox7
-            // 
-            this.pictureBox7.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("pictureBox7.BackgroundImage")));
-            this.pictureBox7.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.pictureBox7.Dock = System.Windows.Forms.DockStyle.Left;
-            this.pictureBox7.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox7.Margin = new System.Windows.Forms.Padding(4);
-            this.pictureBox7.Name = "pictureBox7";
-            this.pictureBox7.Size = new System.Drawing.Size(64, 49);
-            this.pictureBox7.TabIndex = 2;
-            this.pictureBox7.TabStop = false;
             // 
             // FormMain
             // 
@@ -615,10 +556,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1827, 740);
             this.Controls.Add(this.panelMain);
-            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.panel1);
             this.Name = "FormMain";
-            this.Text = "Quản Lý Điểm Sinh Viên";
+            this.Text = "Quản Lý Giảng Dạy";
             this.panelKhoi2.ResumeLayout(false);
             this.panelDiem.ResumeLayout(false);
             this.panelDiem.PerformLayout();
@@ -627,8 +567,6 @@
             this.panelGiangVien.ResumeLayout(false);
             this.panelGiangVien.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.panel1.ResumeLayout(false);
             this.panelKhoi6.ResumeLayout(false);
             this.panelSinhVien.ResumeLayout(false);
@@ -651,14 +589,10 @@
             this.panelSchedule.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).EndInit();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
-
-        private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cáchSửDụngToolStripMenuItem;
         private System.Windows.Forms.Panel panelKhoi2;
         private System.Windows.Forms.Panel panelDiem;
         private System.Windows.Forms.Label label2;
@@ -670,10 +604,6 @@
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Panel panel3;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem accountToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem báoCáoToolStripMenuItem;
         private System.Windows.Forms.Panel panel9;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel panel1;
