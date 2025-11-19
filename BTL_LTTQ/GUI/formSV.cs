@@ -1,6 +1,7 @@
-﻿// formSV.cs
+﻿// formSV.cs - PHIÊN BẢN HOÀN CHỈNH VỚI XUẤT EXCEL
 using System;
 using System.Data;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ namespace BTL_LTTQ
     {
         private SinhVienBLL svBLL = new SinhVienBLL();
         private string maLopHienTai = "";
+        private bool isLoadingData = false;
 
         public formSV()
         {
@@ -25,13 +27,14 @@ namespace BTL_LTTQ
 
         private void formSV_Load(object sender, EventArgs e)
         {
+            isLoadingData = true;
             LoadKhoa();
             LoadTatCaLopTinChi();
-            LoadTatCaSinhVien();
             SetupDataGridView();
+            LoadTatCaSinhVien();
             KhoiTaoTrangThaiThemMoi();
+            isLoadingData = false;
 
-            // Gắn sự kiện
             cmbTimTheoKhoa.SelectedIndexChanged += cmbTimTheoKhoa_SelectedIndexChanged;
             cmbTimTheoLop.SelectedIndexChanged += cmbTimTheoLop_SelectedIndexChanged;
             tbTimKiemTheoMa.TextChanged += tbTimKiemTheoMa_TextChanged;
@@ -43,7 +46,7 @@ namespace BTL_LTTQ
             btnSua.Click += btnSua_Click;
             btnXoa.Click += btnXoa_Click;
             btnLamMoi.Click += btnLamMoi_Click;
-            btnXuatExcel.Click += btnXuatExcel_Click; // ✅ THÊM SỰ KIỆN
+            btnXuatExcel.Click += btnXuatExcel_Click; // ✅ THÊM SỰ KIỆN XUẤT EXCEL
         }
 
         #region CẤU HÌNH
@@ -56,12 +59,15 @@ namespace BTL_LTTQ
 
         private void CauHinhPlaceholder()
         {
+            tbTimKiemTheoMa.Text = "Nhập mã sinh viên...";
+            tbTimKiemTheoMa.ForeColor = SystemColors.GrayText;
+
             tbTimKiemTheoMa.GotFocus += (s, e) =>
             {
                 if (tbTimKiemTheoMa.Text == "Nhập mã sinh viên...")
                 {
                     tbTimKiemTheoMa.Text = "";
-                    tbTimKiemTheoMa.ForeColor = System.Drawing.SystemColors.WindowText;
+                    tbTimKiemTheoMa.ForeColor = SystemColors.WindowText;
                 }
             };
             tbTimKiemTheoMa.LostFocus += (s, e) =>
@@ -69,7 +75,7 @@ namespace BTL_LTTQ
                 if (string.IsNullOrWhiteSpace(tbTimKiemTheoMa.Text))
                 {
                     tbTimKiemTheoMa.Text = "Nhập mã sinh viên...";
-                    tbTimKiemTheoMa.ForeColor = System.Drawing.SystemColors.GrayText;
+                    tbTimKiemTheoMa.ForeColor = SystemColors.GrayText;
                 }
             };
         }
@@ -97,79 +103,99 @@ namespace BTL_LTTQ
                     col.DefaultCellStyle.Format = "dd/MM/yyyy";
                 dgvSV.Columns.Add(col);
             }
+
+            dgvSV.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "MaLop",
+                DataPropertyName = "MaLop",
+                Visible = false
+            });
         }
         #endregion
 
         #region LOAD DỮ LIỆU
         private void LoadKhoa()
         {
-            var dt = svBLL.LayKhoa();
-            DataRow empty = dt.NewRow();
-            empty["MaKhoa"] = DBNull.Value;
-            empty["TenKhoa"] = "-- Chọn khoa --";
-            dt.Rows.InsertAt(empty, 0);
+            try
+            {
+                var dt = svBLL.LayKhoa();
+                DataRow empty = dt.NewRow();
+                empty["MaKhoa"] = DBNull.Value;
+                empty["TenKhoa"] = "-- Chọn khoa --";
+                dt.Rows.InsertAt(empty, 0);
 
-            var dsKhoa = dt.Copy();
+                cmbTimTheoKhoa.DataSource = dt.Copy();
+                cmbTimTheoKhoa.DisplayMember = "TenKhoa";
+                cmbTimTheoKhoa.ValueMember = "MaKhoa";
+                cmbTimTheoKhoa.SelectedIndex = 0;
 
-            cmbTimTheoKhoa.DataSource = dsKhoa;
-            cmbTimTheoKhoa.DisplayMember = "TenKhoa";
-            cmbTimTheoKhoa.ValueMember = "MaKhoa";
-
-            cmbKhoa.DataSource = dt.Copy();
-            cmbKhoa.DisplayMember = "TenKhoa";
-            cmbKhoa.ValueMember = "MaKhoa";
-
-            cmbTimTheoKhoa.SelectedIndex = 0;
-            cmbKhoa.SelectedIndex = 0;
+                cmbKhoa.DataSource = dt.Copy();
+                cmbKhoa.DisplayMember = "TenKhoa";
+                cmbKhoa.ValueMember = "MaKhoa";
+                cmbKhoa.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi load khoa: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadTatCaLopTinChi()
         {
-            var dt = svBLL.LayTatCaLopTinChi();
-            DataRow empty = dt.NewRow();
-            empty["MaLop"] = DBNull.Value;
-            empty["TenLop"] = "-- Chọn lớp --";
-            dt.Rows.InsertAt(empty, 0);
+            try
+            {
+                var dt = svBLL.LayTatCaLopTinChi();
+                DataRow empty = dt.NewRow();
+                empty["MaLop"] = DBNull.Value;
+                empty["TenLop"] = "-- Chọn lớp --";
+                dt.Rows.InsertAt(empty, 0);
 
-            cmbTimTheoLop.DataSource = dt;
-            cmbTimTheoLop.DisplayMember = "TenLop";
-            cmbTimTheoLop.ValueMember = "MaLop";
-            cmbTimTheoLop.SelectedIndex = 0;
+                cmbTimTheoLop.DataSource = dt;
+                cmbTimTheoLop.DisplayMember = "TenLop";
+                cmbTimTheoLop.ValueMember = "MaLop";
+                cmbTimTheoLop.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi load lớp: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void LoadTatCaSinhVien()
         {
-            var dt = svBLL.TimKiem("", "", "");
-            HienThiDanhSach(dt);
-        }
-
-        private void HienThiDanhSach(DataTable dt)
-        {
-            dgvSV.DataSource = dt;
+            try
+            {
+                var dt = svBLL.TimKiem("", "", "");
+                dgvSV.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi load sinh viên: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 
         #region ĐỒNG BỘ KHOA & LỚP
         private void DongBoKhoaLopChiTiet()
         {
-            if (cmbTimTheoKhoa.SelectedValue != null)
-            {
-                string maKhoa = cmbTimTheoKhoa.SelectedValue.ToString();
-                if (!string.IsNullOrEmpty(maKhoa) && maKhoa != "System.DBNull")
-                {
-                    cmbKhoa.SelectedValue = maKhoa;
-                }
-            }
+            if (isLoadingData) return;
 
-            if (cmbTimTheoLop.SelectedValue != null)
+            try
             {
-                string maLop = cmbTimTheoLop.SelectedValue.ToString();
-                if (!string.IsNullOrEmpty(maLop) && maLop != "System.DBNull")
+                if (cmbTimTheoKhoa.SelectedValue != null && cmbTimTheoKhoa.SelectedValue.ToString() != "System.DBNull")
                 {
+                    string maKhoa = cmbTimTheoKhoa.SelectedValue.ToString();
+                    if (cmbKhoa.SelectedValue?.ToString() != maKhoa)
+                        cmbKhoa.SelectedValue = maKhoa;
+                }
+
+                if (cmbTimTheoLop.SelectedValue != null && cmbTimTheoLop.SelectedValue.ToString() != "System.DBNull")
+                {
+                    string maLop = cmbTimTheoLop.SelectedValue.ToString();
                     maLopHienTai = maLop;
 
                     string maKhoa = cmbTimTheoKhoa.SelectedValue?.ToString() ?? "";
-                    DataTable dtLop = string.IsNullOrEmpty(maKhoa)
+                    DataTable dtLop = string.IsNullOrEmpty(maKhoa) || maKhoa == "System.DBNull"
                         ? svBLL.LayTatCaLopTinChi()
                         : svBLL.LayLopTinChiTheoKhoa(maKhoa);
 
@@ -179,24 +205,92 @@ namespace BTL_LTTQ
                     cmbMaLopTC.SelectedValue = maLop;
                     cmbMaLopTC.Enabled = false;
                 }
+                else
+                {
+                    maLopHienTai = "";
+                    cmbMaLopTC.DataSource = null;
+                    cmbMaLopTC.Enabled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi đồng bộ: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void DongBoTuSinhVienLenTimKiem(string tenKhoa, string tenLop)
+        private void DongBoTuSinhVienLenTimKiem(string tenKhoa, string maLop)
         {
-            for (int i = 0; i < cmbTimTheoKhoa.Items.Count; i++)
-            {
-                var item = cmbTimTheoKhoa.Items[i] as DataRowView;
-                if (item != null && item["TenKhoa"].ToString() == tenKhoa)
-                {
-                    cmbTimTheoKhoa.SelectedIndex = i;
-                    break;
-                }
-            }
+            if (isLoadingData) return;
 
-            string maKhoa = cmbTimTheoKhoa.SelectedValue?.ToString() ?? "";
-            if (!string.IsNullOrEmpty(maKhoa) && maKhoa != "System.DBNull")
+            try
             {
+                isLoadingData = true;
+
+                for (int i = 0; i < cmbTimTheoKhoa.Items.Count; i++)
+                {
+                    var item = cmbTimTheoKhoa.Items[i] as DataRowView;
+                    if (item != null && item["TenKhoa"].ToString() == tenKhoa)
+                    {
+                        cmbTimTheoKhoa.SelectedIndex = i;
+                        break;
+                    }
+                }
+
+                string maKhoa = cmbTimTheoKhoa.SelectedValue?.ToString() ?? "";
+                if (!string.IsNullOrEmpty(maKhoa) && maKhoa != "System.DBNull")
+                {
+                    var dtLop = svBLL.LayLopTinChiTheoKhoa(maKhoa);
+                    DataRow empty = dtLop.NewRow();
+                    empty["MaLop"] = DBNull.Value;
+                    empty["TenLop"] = "-- Chọn lớp --";
+                    dtLop.Rows.InsertAt(empty, 0);
+
+                    cmbTimTheoLop.DataSource = dtLop;
+                    cmbTimTheoLop.DisplayMember = "TenLop";
+                    cmbTimTheoLop.ValueMember = "MaLop";
+
+                    if (!string.IsNullOrEmpty(maLop))
+                        cmbTimTheoLop.SelectedValue = maLop;
+                }
+
+                isLoadingData = false;
+                TimKiemTuDong();
+            }
+            catch (Exception ex)
+            {
+                isLoadingData = false;
+                MessageBox.Show($"Lỗi đồng bộ: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        #endregion
+
+        #region LỌC THEO KHOA & LỚP
+        private void cmbTimTheoKhoa_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (isLoadingData) return;
+
+            try
+            {
+                if (cmbTimTheoKhoa.SelectedIndex <= 0 || cmbTimTheoKhoa.SelectedValue == null)
+                {
+                    isLoadingData = true;
+                    LoadTatCaLopTinChi();
+                    isLoadingData = false;
+                    TimKiemTuDong();
+                    return;
+                }
+
+                string maKhoa = cmbTimTheoKhoa.SelectedValue.ToString();
+                if (string.IsNullOrEmpty(maKhoa) || maKhoa == "System.DBNull")
+                {
+                    isLoadingData = true;
+                    LoadTatCaLopTinChi();
+                    isLoadingData = false;
+                    TimKiemTuDong();
+                    return;
+                }
+
+                isLoadingData = true;
                 var dtLop = svBLL.LayLopTinChiTheoKhoa(maKhoa);
                 DataRow empty = dtLop.NewRow();
                 empty["MaLop"] = DBNull.Value;
@@ -206,63 +300,70 @@ namespace BTL_LTTQ
                 cmbTimTheoLop.DataSource = dtLop;
                 cmbTimTheoLop.DisplayMember = "TenLop";
                 cmbTimTheoLop.ValueMember = "MaLop";
+                cmbTimTheoLop.SelectedIndex = 0;
+                isLoadingData = false;
 
-                var found = dtLop.Select($"TenLop = '{tenLop.Replace("'", "''")}'");
-                if (found.Length > 0)
-                    cmbTimTheoLop.SelectedValue = found[0]["MaLop"];
+                TimKiemTuDong();
             }
-        }
-        #endregion
-
-        #region LỌC THEO KHOA & LỚP
-        private void cmbTimTheoKhoa_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (cmbTimTheoKhoa.SelectedIndex <= 0 || cmbTimTheoKhoa.SelectedValue == null) return;
-
-            string maKhoa = cmbTimTheoKhoa.SelectedValue.ToString();
-            if (string.IsNullOrEmpty(maKhoa) || maKhoa == "System.DBNull") return;
-
-            var dtLop = svBLL.LayLopTinChiTheoKhoa(maKhoa);
-            DataRow empty = dtLop.NewRow();
-            empty["MaLop"] = DBNull.Value;
-            empty["TenLop"] = "-- Chọn lớp --";
-            dtLop.Rows.InsertAt(empty, 0);
-
-            cmbTimTheoLop.DataSource = dtLop;
-            cmbTimTheoLop.DisplayMember = "TenLop";
-            cmbTimTheoLop.ValueMember = "MaLop";
-            cmbTimTheoLop.SelectedIndex = 0;
-
-            TimKiemTuDong();
-            DongBoKhoaLopChiTiet();
+            catch (Exception ex)
+            {
+                isLoadingData = false;
+                MessageBox.Show($"Lỗi chọn khoa: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void cmbTimTheoLop_SelectedIndexChanged(object sender, EventArgs e)
         {
-            maLopHienTai = cmbTimTheoLop.SelectedValue?.ToString() ?? "";
-            TimKiemTuDong();
-            DongBoKhoaLopChiTiet();
+            if (isLoadingData) return;
+
+            try
+            {
+                if (cmbTimTheoLop.SelectedValue != null && cmbTimTheoLop.SelectedValue.ToString() != "System.DBNull")
+                    maLopHienTai = cmbTimTheoLop.SelectedValue.ToString();
+                else
+                    maLopHienTai = "";
+
+                TimKiemTuDong();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi chọn lớp: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void tbTimKiemTheoMa_TextChanged(object sender, EventArgs e)
         {
-            if (tbTimKiemTheoMa.Text == "Nhập mã sinh viên..." || string.IsNullOrWhiteSpace(tbTimKiemTheoMa.Text))
+            if (tbTimKiemTheoMa.Text == "Nhập mã sinh viên...")
                 return;
             TimKiemTuDong();
         }
 
         private void TimKiemTuDong()
         {
-            string maKhoa = cmbTimTheoKhoa.SelectedValue?.ToString() ?? "";
-            string maLop = cmbTimTheoLop.SelectedValue?.ToString() ?? "";
-            string maSV = tbTimKiemTheoMa.Text.Trim();
+            if (isLoadingData) return;
 
-            if (maSV == "Nhập mã sinh viên...") maSV = "";
-            if (maKhoa == "System.DBNull") maKhoa = "";
-            if (maLop == "System.DBNull") maLop = "";
+            try
+            {
+                string maKhoa = "";
+                string maLop = "";
+                string maSV = tbTimKiemTheoMa.Text.Trim();
 
-            var dt = svBLL.TimKiem(maKhoa, maLop, maSV);
-            HienThiDanhSach(dt);
+                if (cmbTimTheoKhoa.SelectedValue != null && cmbTimTheoKhoa.SelectedValue.ToString() != "System.DBNull")
+                    maKhoa = cmbTimTheoKhoa.SelectedValue.ToString();
+
+                if (cmbTimTheoLop.SelectedValue != null && cmbTimTheoLop.SelectedValue.ToString() != "System.DBNull")
+                    maLop = cmbTimTheoLop.SelectedValue.ToString();
+
+                if (maSV == "Nhập mã sinh viên...")
+                    maSV = "";
+
+                var dt = svBLL.TimKiem(maKhoa, maLop, maSV);
+                dgvSV.DataSource = dt;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi tìm kiếm: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 
@@ -271,15 +372,15 @@ namespace BTL_LTTQ
 
         private void btnTatCa_Click(object sender, EventArgs e)
         {
+            isLoadingData = true;
             cmbTimTheoKhoa.SelectedIndex = 0;
             LoadTatCaLopTinChi();
             tbTimKiemTheoMa.Text = "Nhập mã sinh viên...";
-            tbTimKiemTheoMa.ForeColor = System.Drawing.SystemColors.GrayText;
+            tbTimKiemTheoMa.ForeColor = SystemColors.GrayText;
+            isLoadingData = false;
             LoadTatCaSinhVien();
             KhoiTaoTrangThaiThemMoi();
-            
-            // ✅ THÊM: Reset highlight
-            ResetHighlightTatCa();
+            ResetHighlight();
         }
         #endregion
 
@@ -318,19 +419,8 @@ namespace BTL_LTTQ
             dtpNgaySinh.Value = DateTime.Now;
             rdoNam.Checked = true;
             tbDiaChi.Clear(); tbSoDt.Clear(); tbEmail.Clear();
-
-            // Giữ lớp đang chọn → khóa
-            if (!string.IsNullOrEmpty(maLopHienTai) && maLopHienTai != "System.DBNull")
-            {
-                cmbMaLopTC.Enabled = false;
-            }
-            else
-            {
-                cmbMaLopTC.Enabled = true;
-            }
-            
-            // ✅ THÊM: Reset highlight khi làm mới
-            ResetHighlightTatCa();
+            cmbMaLopTC.Enabled = !string.IsNullOrEmpty(maLopHienTai);
+            ResetHighlight();
         }
 
         private void KhoiTaoTrangThaiSua()
@@ -341,10 +431,10 @@ namespace BTL_LTTQ
         }
         #endregion
 
-        #region THÊM SINH VIÊN – KIỂM TRA THÔNG MINH
+        #region THÊM SINH VIÊN
         private void btnThem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(maLopHienTai) || maLopHienTai == "System.DBNull")
+            if (string.IsNullOrEmpty(maLopHienTai))
             {
                 MessageBox.Show("Vui lòng chọn lớp tín chỉ ở phần tìm kiếm!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -357,64 +447,63 @@ namespace BTL_LTTQ
                 return;
             }
 
-            // 1. Kiểm tra SV đã có trong lớp hiện tại chưa?
             if (svBLL.KiemTraSVTrongLop(maSV, maLopHienTai))
             {
                 MessageBox.Show($"Sinh viên {maSV} đã tồn tại trong lớp này!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tbMaSV.Focus();
                 return;
             }
 
-            // 2. Kiểm tra SV có tồn tại ở lớp khác không?
+            // ✅ KIỂM TRA SINH VIÊN ĐÃ TỒN TẠI
             var svTonTai = svBLL.LaySinhVienTheoMa(maSV);
             if (svTonTai != null)
             {
-                // Đã có ở lớp khác → hỏi thêm và điền toàn bộ dữ liệu
-                string msg = $"Sinh viên mã {maSV} đã tồn tại:\n" +
-                             $"- Tên: {svTonTai.TenSV}\n" +
-                             $"- Giới tính: {svTonTai.GioiTinh}\n" +
-                             $"- Ngày sinh: {svTonTai.NgaySinh:dd/MM/yyyy}\n" +
-                             $"- Quê quán: {svTonTai.QueQuan}\n" +
-                             $"- SĐT: {svTonTai.SDT}\n" +
-                             $"- Email: {svTonTai.Email}\n\n" +
-                             $"Bạn có muốn thêm sinh viên này vào lớp hiện tại không?";
+                // ✅ HIỂN THỊ THÔNG TIN CHI TIẾT VÀ HỎI XÁC NHẬN
+                string msg = $"SINH VIÊN ĐÃ TỒN TẠI TRONG HỆ THỐNG!\n\n" +
+                             $"📋 THÔNG TIN SINH VIÊN:\n" +
+                             $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                             $"Mã SV: {svTonTai.MaSV}\n" +
+                             $"Họ tên: {svTonTai.TenSV}\n" +
+                             $"Giới tính: {svTonTai.GioiTinh}\n" +
+                             $"Ngày sinh: {(svTonTai.NgaySinh.HasValue ? svTonTai.NgaySinh.Value.ToString("dd/MM/yyyy") : "Chưa có")}\n" +
+                             $"Quê quán: {(string.IsNullOrEmpty(svTonTai.QueQuan) ? "Chưa có" : svTonTai.QueQuan)}\n" +
+                             $"SĐT: {(string.IsNullOrEmpty(svTonTai.SDT) ? "Chưa có" : svTonTai.SDT)}\n" +
+                             $"Email: {(string.IsNullOrEmpty(svTonTai.Email) ? "Chưa có" : svTonTai.Email)}\n" +
+                             $"━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+                             $"⚠ BẠN CÓ MUỐN THÊM SINH VIÊN NÀY VÀO LỚP HIỆN TẠI KHÔNG?\n\n" +
+                             $"Lớp: {cmbTimTheoLop.Text}";
 
-                if (MessageBox.Show(msg, "Xác nhận thêm", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                {
-                    // Điền toàn bộ thông tin vào form
-                    tbHoTen.Text = svTonTai.TenSV;
-                    dtpNgaySinh.Value = svTonTai.NgaySinh ?? DateTime.Now;
-                    rdoNam.Checked = svTonTai.GioiTinh == "Nam";
-                    rdoNu.Checked = svTonTai.GioiTinh != "Nam";
-                    tbDiaChi.Text = svTonTai.QueQuan;
-                    tbSoDt.Text = svTonTai.SDT;
-                    tbEmail.Text = svTonTai.Email;
+                DialogResult result = MessageBox.Show(msg, "Xác nhận thêm sinh viên đã tồn tại", 
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-                    // Đồng bộ khoa nếu khác
-                    if (!string.IsNullOrEmpty(svTonTai.MaKhoa))
-                    {
-                        cmbKhoa.SelectedValue = svTonTai.MaKhoa;
-                    }
-                }
-                else
+                if (result != DialogResult.Yes)
                 {
                     tbMaSV.Focus();
                     return;
                 }
+
+                // ✅ TỰ ĐỘNG ĐIỀN THÔNG TIN VÀO FORM
+                tbHoTen.Text = svTonTai.TenSV;
+                dtpNgaySinh.Value = svTonTai.NgaySinh ?? DateTime.Now;
+                rdoNam.Checked = svTonTai.GioiTinh == "Nam";
+                rdoNu.Checked = svTonTai.GioiTinh != "Nam";
+                tbDiaChi.Text = svTonTai.QueQuan;
+                tbSoDt.Text = svTonTai.SDT;
+                tbEmail.Text = svTonTai.Email;
+                if (!string.IsNullOrEmpty(svTonTai.MaKhoa))
+                    cmbKhoa.SelectedValue = svTonTai.MaKhoa;
             }
             else
             {
-                // Sinh viên mới → validate đầy đủ
+                // SINH VIÊN MỚI → YÊU CẦU NHẬP ĐẦY ĐỦ THÔNG TIN
                 if (string.IsNullOrWhiteSpace(tbHoTen.Text))
                 {
                     MessageBox.Show("Nhập Họ tên!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
                 if (!ValidateInput()) return;
             }
 
-            // Tạo đối tượng SV (dùng dữ liệu từ form)
+            // THỰC HIỆN THÊM VÀO DATABASE
             var sv = new SinhVienDTO
             {
                 MaSV = maSV,
@@ -430,9 +519,10 @@ namespace BTL_LTTQ
 
             if (svBLL.Them(sv))
             {
-                MessageBox.Show("Thêm thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"✅ THÊM THÀNH CÔNG!\n\nSinh viên {sv.TenSV} ({sv.MaSV}) đã được thêm vào lớp {cmbTimTheoLop.Text}", 
+                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TimKiemTuDong();
-                KhoiTaoTrangThaiThemMoi();
+                HighlightSinhVien(maSV);
             }
             else
             {
@@ -441,7 +531,7 @@ namespace BTL_LTTQ
         }
         #endregion
 
-        #region SỬA / XÓA
+        #region SỬA / XÓA / LÀM MỚI
         private void btnSua_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(tbMaSV.Text))
@@ -452,9 +542,11 @@ namespace BTL_LTTQ
 
             if (!ValidateInput()) return;
 
+            string maSVDangChon = tbMaSV.Text.Trim();
+
             var sv = new SinhVienDTO
             {
-                MaSV = tbMaSV.Text.Trim(),
+                MaSV = maSVDangChon,
                 TenSV = tbHoTen.Text.Trim(),
                 NgaySinh = dtpNgaySinh.Value,
                 GioiTinh = rdoNam.Checked ? "Nam" : "Nữ",
@@ -467,6 +559,7 @@ namespace BTL_LTTQ
             {
                 MessageBox.Show("Sửa thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 TimKiemTuDong();
+                HighlightSinhVien(maSVDangChon);
             }
             else
             {
@@ -476,7 +569,7 @@ namespace BTL_LTTQ
 
         private void btnXoa_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(maLopHienTai) || maLopHienTai == "System.DBNull" || string.IsNullOrWhiteSpace(tbMaSV.Text))
+            if (string.IsNullOrEmpty(maLopHienTai) || string.IsNullOrWhiteSpace(tbMaSV.Text))
             {
                 MessageBox.Show("Chọn lớp và sinh viên để xóa!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
@@ -499,7 +592,7 @@ namespace BTL_LTTQ
 
         private void btnLamMoi_Click(object sender, EventArgs e)
         {
-            KhoiTaoTrangThaiThemMoi(); // LỚP DƯỚI KHÔNG SỬA ĐƯỢC
+            KhoiTaoTrangThaiThemMoi();
         }
         #endregion
 
@@ -518,74 +611,77 @@ namespace BTL_LTTQ
 
         private void LoadChiTietSinhVien(int rowIndex)
         {
-            var row = dgvSV.Rows[rowIndex];
-
-            string maSV = row.Cells["MaSV"].Value?.ToString() ?? "";
-            
-            tbMaSV.Text = maSV;
-            tbHoTen.Text = row.Cells["TenSV"].Value?.ToString() ?? "";
-            dtpNgaySinh.Value = row.Cells["NgaySinh"].Value is DateTime dt ? dt : DateTime.Today;
-            rdoNam.Checked = row.Cells["GioiTinh"].Value?.ToString() == "Nam";
-            rdoNu.Checked = !rdoNam.Checked;
-            tbDiaChi.Text = row.Cells["QueQuan"].Value?.ToString() ?? "";
-            tbSoDt.Text = row.Cells["SDT"].Value?.ToString() ?? "";
-            tbEmail.Text = row.Cells["Email"].Value?.ToString() ?? "";
-
-            string tenKhoa = row.Cells["TenKhoa"].Value?.ToString() ?? "";
-            string tenLop = row.Cells["TenLop"].Value?.ToString() ?? "";
-
-            if (!string.IsNullOrEmpty(tenKhoa) && !string.IsNullOrEmpty(tenLop))
+            try
             {
-                DongBoTuSinhVienLenTimKiem(tenKhoa, tenLop);
-            }
+                var row = dgvSV.Rows[rowIndex];
+                string maSV = row.Cells["MaSV"].Value?.ToString() ?? "";
 
-            DongBoKhoaLopChiTiet();
-            KhoiTaoTrangThaiSua();
-            
-            // ✅ THÊM: Highlight sinh viên đang chọn
-            HighlightSinhVienDangChon(maSV);
+                tbMaSV.Text = maSV;
+                tbHoTen.Text = row.Cells["TenSV"].Value?.ToString() ?? "";
+                dtpNgaySinh.Value = row.Cells["NgaySinh"].Value is DateTime dt ? dt : DateTime.Today;
+                rdoNam.Checked = row.Cells["GioiTinh"].Value?.ToString() == "Nam";
+                rdoNu.Checked = !rdoNam.Checked;
+                tbDiaChi.Text = row.Cells["QueQuan"].Value?.ToString() ?? "";
+                tbSoDt.Text = row.Cells["SDT"].Value?.ToString() ?? "";
+                tbEmail.Text = row.Cells["Email"].Value?.ToString() ?? "";
+
+                string tenKhoa = row.Cells["TenKhoa"].Value?.ToString() ?? "";
+                string maLop = row.Cells["MaLop"].Value?.ToString() ?? "";
+
+                if (!string.IsNullOrEmpty(tenKhoa) && !string.IsNullOrEmpty(maLop))
+                {
+                    DongBoTuSinhVienLenTimKiem(tenKhoa, maLop);
+                    HighlightSinhVien(maSV);
+                }
+
+                DongBoKhoaLopChiTiet();
+                KhoiTaoTrangThaiSua();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi load chi tiết: {ex.Message}", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 
-        #region HIGHLIGHT SINH VIÊN ĐANG CHỌN
-private void HighlightSinhVienDangChon(string maSV)
-{
-    if (dgvSV.Rows.Count == 0 || string.IsNullOrEmpty(maSV)) return;
-
-    foreach (DataGridViewRow row in dgvSV.Rows)
-    {
-        if (row.Cells["MaSV"].Value?.ToString() == maSV)
+        #region HIGHLIGHT SINH VIÊN
+        private void HighlightSinhVien(string maSV)
         {
-            row.Selected = true;
-            dgvSV.FirstDisplayedScrollingRowIndex = row.Index;
-            
-            // Tô màu nổi bật hơn
-            row.DefaultCellStyle.BackColor = System.Drawing.Color.FromArgb(178, 223, 219);
-            row.DefaultCellStyle.ForeColor = System.Drawing.Color.Black;
-            row.DefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Bold);
+            if (dgvSV.Rows.Count == 0 || string.IsNullOrEmpty(maSV)) return;
+
+            foreach (DataGridViewRow row in dgvSV.Rows)
+            {
+                if (row.Cells["MaSV"].Value?.ToString() == maSV)
+                {
+                    row.Selected = true;
+                    if (row.Index >= 0 && row.Index < dgvSV.Rows.Count)
+                        dgvSV.FirstDisplayedScrollingRowIndex = row.Index;
+
+                    row.DefaultCellStyle.BackColor = Color.FromArgb(178, 223, 219);
+                    row.DefaultCellStyle.ForeColor = Color.Black;
+                    row.DefaultCellStyle.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold);
+                }
+                else
+                {
+                    row.DefaultCellStyle.BackColor = SystemColors.Window;
+                    row.DefaultCellStyle.ForeColor = Color.FromArgb(64, 64, 64);
+                    row.DefaultCellStyle.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular);
+                }
+            }
         }
-        else
+
+        private void ResetHighlight()
         {
-            // Reset lại các row khác
-            row.DefaultCellStyle.BackColor = System.Drawing.SystemColors.Window;
-            row.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(64, 64, 64);
-            row.DefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular);
+            foreach (DataGridViewRow row in dgvSV.Rows)
+            {
+                row.DefaultCellStyle.BackColor = SystemColors.Window;
+                row.DefaultCellStyle.ForeColor = Color.FromArgb(64, 64, 64);
+                row.DefaultCellStyle.Font = new Font("Segoe UI", 9.75F, FontStyle.Regular);
+            }
         }
-    }
-}
+        #endregion
 
-private void ResetHighlightTatCa()
-{
-    foreach (DataGridViewRow row in dgvSV.Rows)
-    {
-        row.DefaultCellStyle.BackColor = System.Drawing.SystemColors.Window;
-        row.DefaultCellStyle.ForeColor = System.Drawing.Color.FromArgb(64, 64, 64);
-        row.DefaultCellStyle.Font = new System.Drawing.Font("Segoe UI", 9.75F, System.Drawing.FontStyle.Regular);
-    }
-}
-#endregion
-
-        // ✅ THÊM HÀM MỚI: XUẤT EXCEL
+        #region ✅ XUẤT EXCEL
         private void btnXuatExcel_Click(object sender, EventArgs e)
         {
             try
@@ -597,16 +693,14 @@ private void ResetHighlightTatCa()
                     return;
                 }
 
-                // Lấy thông tin lớp đang chọn
                 string tenLop = cmbTimTheoLop.SelectedIndex > 0 
-                    ? cmbTimTheoLop.Text 
+                    ? cmbTimTheoLop.Text.Replace(" - ", "_").Replace(" ", "_")
                     : "TatCa";
                 
                 string tenKhoa = cmbTimTheoKhoa.SelectedIndex > 0 
-                    ? cmbTimTheoKhoa.Text 
+                    ? cmbTimTheoKhoa.Text.Replace(" - ", "_").Replace(" ", "_")
                     : "TatCa";
 
-                // Tạo SaveFileDialog
                 SaveFileDialog sfd = new SaveFileDialog();
                 sfd.Filter = "Excel Files (*.csv)|*.csv|All Files (*.*)|*.*";
                 sfd.FileName = $"DanhSach_SinhVien_{tenLop}_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
@@ -614,11 +708,10 @@ private void ResetHighlightTatCa()
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    // Xuất dữ liệu ra CSV
                     ExportToCSV(sfd.FileName, tenKhoa, tenLop);
                     
                     DialogResult result = MessageBox.Show(
-                        $"Xuất file thành công!\n\n" +
+                        $"✅ XUẤT FILE THÀNH CÔNG!\n\n" +
                         $"Đường dẫn: {sfd.FileName}\n" +
                         $"Tổng số sinh viên: {dgvSV.Rows.Count}\n\n" +
                         "Bạn có muốn mở file ngay không?",
@@ -645,21 +738,18 @@ private void ResetHighlightTatCa()
 
             using (StreamWriter sw = new StreamWriter(filePath, false, Encoding.UTF8))
             {
-                // Ghi tiêu đề
                 sb.AppendLine("DANH SÁCH SINH VIÊN");
                 sb.AppendLine($"Khoa: {tenKhoa}");
                 sb.AppendLine($"Lớp tín chỉ: {tenLop}");
                 sb.AppendLine($"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
                 sb.AppendLine($"Tổng số sinh viên: {dgvSV.Rows.Count}");
-                sb.AppendLine(); // Dòng trống
+                sb.AppendLine();
 
-                // Ghi header các cột (chỉ các cột visible)
                 var headers = dgvSV.Columns.Cast<DataGridViewColumn>()
                     .Where(c => c.Visible)
                     .Select(c => EscapeCSV(c.HeaderText));
                 sb.AppendLine(string.Join(",", headers));
 
-                // Ghi dữ liệu từng dòng
                 foreach (DataGridViewRow row in dgvSV.Rows)
                 {
                     if (row.IsNewRow) continue;
@@ -670,7 +760,6 @@ private void ResetHighlightTatCa()
                         {
                             var cellValue = row.Cells[c.Index].Value;
                             
-                            // Format ngày tháng
                             if (cellValue is DateTime dt)
                                 return EscapeCSV(dt.ToString("dd/MM/yyyy"));
                             
@@ -684,21 +773,19 @@ private void ResetHighlightTatCa()
             }
         }
 
-        // Hàm escape ký tự đặc biệt trong CSV
         private string EscapeCSV(string value)
         {
             if (string.IsNullOrEmpty(value))
                 return "\"\"";
 
-            // Nếu có dấu phẩy, dấu nháy kép hoặc xuống dòng → bọc trong dấu nháy kép
             if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
             {
-                value = value.Replace("\"", "\"\""); // Escape dấu nháy kép
+                value = value.Replace("\"", "\"\"");
                 return $"\"{value}\"";
             }
 
             return value;
         }
-
+        #endregion
     }
 }

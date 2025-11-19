@@ -9,17 +9,30 @@ namespace BTL_LTTQ.DAL
 {
     public class SinhVienDAL
     {
-        // LẤY TẤT CẢ SINH VIÊN (HOẶC THEO LỌC)
+        // ✅ SỬA: Hiển thị cả MaLop và TenLop (MaLop + TenMH)
         public DataTable TimKiem(string maKhoa, string maLop, string maSV)
         {
             string query = @"
                 SELECT DISTINCT 
-                    sv.MaSV, sv.TenSV, sv.NgaySinh, sv.GioiTinh, sv.QueQuan, 
-                    sv.SDT, sv.Email, k.TenKhoa, ISNULL(ltc.TenLop, N'') AS TenLop
+                    sv.MaSV, 
+                    sv.TenSV, 
+                    sv.NgaySinh, 
+                    sv.GioiTinh, 
+                    sv.QueQuan, 
+                    sv.SDT, 
+                    sv.Email, 
+                    k.TenKhoa,
+                    ISNULL(d.MaLop, N'') AS MaLop,
+                    CASE 
+                        WHEN d.MaLop IS NOT NULL AND mh.TenMH IS NOT NULL 
+                        THEN d.MaLop + N' - ' + mh.TenMH
+                        ELSE N''
+                    END AS TenLop
                 FROM SinhVien sv
                 INNER JOIN Khoa k ON sv.MaKhoa = k.MaKhoa
                 LEFT JOIN Diem d ON sv.MaSV = d.MaSV
                 LEFT JOIN LopTinChi ltc ON d.MaLop = ltc.MaLop
+                LEFT JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
                 WHERE 1=1";
 
             var parameters = new List<SqlParameter>();
@@ -42,33 +55,45 @@ namespace BTL_LTTQ.DAL
                 parameters.Add(new SqlParameter("@MaSV", $"%{maSV}%"));
             }
 
+            query += " ORDER BY sv.MaSV";
+
             return DatabaseConnection.ExecuteQuery(query, parameters.ToArray());
         }
 
         public DataTable LayKhoa()
         {
-            return DatabaseConnection.ExecuteQuery("SELECT MaKhoa, TenKhoa FROM Khoa");
+            return DatabaseConnection.ExecuteQuery("SELECT MaKhoa, TenKhoa FROM Khoa ORDER BY MaKhoa");
         }
 
+        // ✅ SỬA: Hiển thị "MaLop - TenMH"
         public DataTable LayTatCaLopTinChi()
         {
-            return DatabaseConnection.ExecuteQuery("SELECT MaLop, TenLop FROM LopTinChi");
+            string query = @"
+                SELECT 
+                    ltc.MaLop,
+                    ltc.MaLop + N' - ' + mh.TenMH AS TenLop
+                FROM LopTinChi ltc
+                INNER JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
+                ORDER BY ltc.MaLop";
+            return DatabaseConnection.ExecuteQuery(query);
         }
 
+        // ✅ SỬA: Hiển thị "MaLop - TenMH"
         public DataTable LayLopTinChiTheoKhoa(string maKhoa)
         {
             string query = @"
-                SELECT DISTINCT ltc.MaLop, ltc.TenLop
+                SELECT DISTINCT 
+                    ltc.MaLop,
+                    ltc.MaLop + N' - ' + mh.TenMH AS TenLop
                 FROM LopTinChi ltc
                 INNER JOIN MonHoc mh ON ltc.MaMH = mh.MaMH
-                WHERE mh.MaKhoa = @MaKhoa";
+                WHERE mh.MaKhoa = @MaKhoa
+                ORDER BY ltc.MaLop";
             return DatabaseConnection.ExecuteQuery(query, new[] { new SqlParameter("@MaKhoa", maKhoa) });
         }
 
-        // THÊM SINH VIÊN VÀO LỚP TÍN CHỈ
         public bool Them(SinhVienDTO sv)
         {
-            // Kiểm tra trùng SV trong lớp
             string check = "SELECT COUNT(*) FROM Diem WHERE MaSV = @MaSV AND MaLop = @MaLop";
             if ((int)DatabaseConnection.ExecuteScalar(check, new[]
             {
@@ -76,7 +101,6 @@ namespace BTL_LTTQ.DAL
                 new SqlParameter("@MaLop", sv.MaLop)
             }) > 0) return false;
 
-            // Nếu SV chưa tồn tại → thêm mới
             bool svMoi = (int)DatabaseConnection.ExecuteScalar(
                 "SELECT COUNT(*) FROM SinhVien WHERE MaSV = @MaSV",
                 new[] { new SqlParameter("@MaSV", sv.MaSV) }) == 0;
@@ -103,7 +127,6 @@ namespace BTL_LTTQ.DAL
                     return false;
             }
 
-            // Thêm vào lớp tín chỉ
             string insertDiem = "INSERT INTO Diem (MaSV, MaLop) VALUES (@MaSV, @MaLop)";
             return DatabaseConnection.ExecuteNonQuery(insertDiem, new[]
             {
@@ -112,7 +135,6 @@ namespace BTL_LTTQ.DAL
             }) > 0;
         }
 
-        // SỬA THÔNG TIN CÁ NHÂN (KHÔNG ĐỔI LỚP)
         public bool Sua(SinhVienDTO sv)
         {
             string query = @"
@@ -135,7 +157,6 @@ namespace BTL_LTTQ.DAL
             return DatabaseConnection.ExecuteNonQuery(query, p) > 0;
         }
 
-        // DAL/SinhVienDAL.cs
         public bool Xoa(string maSV, string maLop)
         {
             try
@@ -144,7 +165,6 @@ namespace BTL_LTTQ.DAL
                     "DELETE FROM Diem WHERE MaSV = @MaSV AND MaLop = @MaLop",
                     new[] { new SqlParameter("@MaSV", maSV), new SqlParameter("@MaLop", maLop) });
 
-                // Nếu SV không còn lớp nào → xóa luôn
                 if ((int)DatabaseConnection.ExecuteScalar("SELECT COUNT(*) FROM Diem WHERE MaSV = @MaSV",
                     new[] { new SqlParameter("@MaSV", maSV) }) == 0)
                 {

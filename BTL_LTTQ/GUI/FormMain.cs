@@ -25,6 +25,7 @@ namespace BTL_LTTQ
             paneLopTC.Click += (s, e) => LoadChildForm(typeof(formLopTC));
             panelDiem.Click += (s, e) => LoadChildForm(typeof(formDiem));
             panelSinhVien.Click += (s, e) => LoadChildForm(typeof(formSV));
+            panelSchedule.Click += (s, e) => LoadChildForm(typeof(formLichGiangDay));
 
             // Hiển thị user đang đăng nhập
             DisplayUserInfo();
@@ -104,6 +105,10 @@ private void ConfigureAccessByRole()
         panelKhoi6.Location = new System.Drawing.Point(panelKhoi6.Location.X, currentY);
         currentY += panelKhoi6.Height;
 
+        // --- Dịch chuyển Lịch Trình (Schedule) - MỚI ---
+        panelKhoi7.Location = new System.Drawing.Point(panelKhoi7.Location.X, currentY);
+        currentY += panelKhoi7.Height;
+
         // --- KHẮC PHỤC: Dịch chuyển chỉ trắng dưới cùng (panel4) ---
         // panel4 phải nằm ngay dưới đáy của panelKhoi6
         panel4.Location = new System.Drawing.Point(panel4.Location.X, currentY);
@@ -119,9 +124,10 @@ private void ConfigureAccessByRole()
         panelKhoi4.Location = new System.Drawing.Point(0, 249);
         panelKhoi5.Location = new System.Drawing.Point(0, 299);
         panelKhoi6.Location = new System.Drawing.Point(0, 350);
+        panelKhoi7.Location = new System.Drawing.Point(0, 401);
         
         // Reset lại vị trí chỉ trắng panel4
-        panel4.Location = new System.Drawing.Point(0, 401);
+        panel4.Location = new System.Drawing.Point(0, 452);
     }
 }
 
@@ -136,6 +142,11 @@ private void ConfigureAccessByRole()
         }
 
         private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblUserInfo_Click(object sender, EventArgs e)
         {
 
         }
