@@ -1,176 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿// LoginBLL.cs
 using BTL_LTTQ.DAL;
+using BTL_LTTQ.DTO;
 using BTL_LTTQ.BLL.Session;
 
-namespace BTL_LTTQ.BLL.Login
+namespace BTL_LTTQ.BLL
 {
     public class LoginBLL
     {
-        private LoginDAL loginDAL;
+        private readonly LoginDAL _loginDAL;
 
         public LoginBLL()
         {
-            loginDAL = new LoginDAL();
+            _loginDAL = new LoginDAL();
         }
 
-        // Phương thức chính xử lý đăng nhập
-        public bool ProcessLogin(string tenDangNhap, string matKhau, Form currentForm)
+        public (bool Success, string Message) ProcessLogin(string username, string password)
         {
-            try
-            {
-                // Validate input
-                if (!ValidateInput(tenDangNhap, matKhau))
-                {
-                    return false;
-                }
+            // Validate input
+            if (string.IsNullOrWhiteSpace(username) || username.Length < 3)
+                return (false, "Tên đăng nhập phải có ít nhất 3 ký tự!");
 
-                // Kiểm tra đăng nhập qua DAL
-                bool isValidLogin = loginDAL.Login(tenDangNhap, matKhau);
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 3)
+                return (false, "Mật khẩu phải có ít nhất 3 ký tự!");
 
-                if (isValidLogin)
-                {
-                    // Lấy thông tin user từ database
-                    DataRow userInfo = loginDAL.GetUserInfo(tenDangNhap, matKhau);
+            // Call DAL
+            UserInfo user = _loginDAL.Login(username, password);
 
-                    if (userInfo != null)
-                    {
-                        // Lưu thông tin vào session
-                        SaveUserSession(userInfo);
+            if (user == null)
+                return (false, "Tên đăng nhập hoặc mật khẩu không đúng!");
 
-                        // Điều hướng sang FormMain
-                        NavigateToMainForm(currentForm);
+            // Set session
+            UserSession.Instance.Set(user);
 
-                        return true;
-                    }
-                    else
-                    {
-                        ShowErrorMessage("Không thể lấy thông tin tài khoản!");
-                        return false;
-                    }
-                }
-                else
-                {
-                    ShowErrorMessage("Tên đăng nhập hoặc mật khẩu không đúng!");
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage("Lỗi khi đăng nhập: " + ex.Message);
-                return false;
-            }
-        }
-
-        // Validate input data
-        private bool ValidateInput(string tenDangNhap, string matKhau)
-        {
-            if (string.IsNullOrEmpty(tenDangNhap) || tenDangNhap.Trim() == "User name")
-            {
-                ShowErrorMessage("Vui lòng nhập tên đăng nhập!");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(matKhau))
-            {
-                ShowErrorMessage("Vui lòng nhập mật khẩu!");
-                return false;
-            }
-
-            if (tenDangNhap.Trim().Length < 3)
-            {
-                ShowErrorMessage("Tên đăng nhập phải có ít nhất 3 ký tự!");
-                return false;
-            }
-
-            if (matKhau.Length < 3)
-            {
-                ShowErrorMessage("Mật khẩu phải có ít nhất 3 ký tự!");
-                return false;
-            }
-
-            return true;
-        }
-
-        // Lưu thông tin user vào session
-        private void SaveUserSession(DataRow userInfo)
-        {
-            string maTK = userInfo["MaTK"].ToString();
-            string tenDangNhap = userInfo["TenDangNhap"].ToString();
-            string loaiTaiKhoan = userInfo["LoaiTaiKhoan"].ToString();
-            string maGV = userInfo["MaGV"] != DBNull.Value ? userInfo["MaGV"].ToString() : null;
-
-            UserSession.SetUserSession(maTK, tenDangNhap, loaiTaiKhoan, maGV);
-        }
-
-        // Điều hướng sang FormMain
-        private void NavigateToMainForm(Form currentForm)
-        {
-            try
-            {
-                // Tạo và hiển thị FormMain
-                BTL_LTTQ.FormMain mainForm = new BTL_LTTQ.FormMain();
-                mainForm.Show();
-
-                // Ẩn form login hiện tại
-                currentForm.Hide();
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage("Lỗi khi chuyển form: " + ex.Message);
-            }
-        }
-
-        // Hiển thị thông báo lỗi
-        private void ShowErrorMessage(string message)
-        {
-            MessageBox.Show(message, "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-
-        // Hiển thị thông báo thành công
-        private void ShowSuccessMessage(string message)
-        {
-            MessageBox.Show(message, "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        // Kiểm tra tài khoản có tồn tại không
-        public bool CheckUserExists(string tenDangNhap)
-        {
-            try
-            {
-                return loginDAL.CheckUserExists(tenDangNhap);
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage("Lỗi khi kiểm tra tài khoản: " + ex.Message);
-                return false;
-            }
-        }
-
-        // Đăng xuất
-        public void Logout(Form currentForm)
-        {
-            try
-            {
-                // Clear session
-                UserSession.ClearSession();
-
-                // Quay về form login
-                BTL_LTTQ.Login loginForm = new BTL_LTTQ.Login();
-                loginForm.Show();
-
-                // Đóng form hiện tại
-                currentForm.Close();
-            }
-            catch (Exception ex)
-            {
-                ShowErrorMessage("Lỗi khi đăng xuất: " + ex.Message);
-            }
+            return (true, "Đăng nhập thành công!");
         }
     }
 }

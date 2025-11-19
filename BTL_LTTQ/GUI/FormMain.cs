@@ -1,156 +1,143 @@
-﻿using BTL_LTTQ.GUI;
+﻿using BTL_LTTQ.BLL.Session;
+using BTL_LTTQ.GUI;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BTL_LTTQ
 {
     public partial class FormMain : Form
     {
-        private formMonHoc formMonHocInstance;
-        private formGV formGVInstance;
-        private formPhanCongGV formPhanCongGVInstance;
-        private formLopTC formLopTCInstance;
-        private formDiem formDiemInstance;
-        private formSV formSVInstance;
+        // Dictionary để cache form con
+        private readonly Dictionary<string, Form> _formCache = new Dictionary<string, Form>();
 
         public FormMain()
         {
             InitializeComponent();
-            LoadFormMonHoc();
-            
-            // Thêm sự kiện click cho các panel
-            panelPhanCongGiangVien.Click += PanelPhanCongGiangVien_Click;
-            panelMonHoc.Click += PanelMonHoc_Click;
-            panelGiangVien.Click += PanelGiangVien_Click;
-            paneLopTC.Click += paneLopTC_Click;
-            panelDiem.Click += PanelDiem_Click;
-            panelSinhVien.Click += panelSinhVien_Click;
+
+            // Load form đầu tiên
+            LoadChildForm(typeof(formMonHoc));
+
+            // Gán sự kiện panel click
+            panelMonHoc.Click += (s, e) => LoadChildForm(typeof(formMonHoc));
+            panelGiangVien.Click += (s, e) => LoadChildForm(typeof(formGV));
+            panelPhanCongGiangVien.Click += (s, e) => LoadChildForm(typeof(formPhanCongGV));
+            paneLopTC.Click += (s, e) => LoadChildForm(typeof(formLopTC));
+            panelDiem.Click += (s, e) => LoadChildForm(typeof(formDiem));
+            panelSinhVien.Click += (s, e) => LoadChildForm(typeof(formSV));
+
+            // Hiển thị user đang đăng nhập
+            DisplayUserInfo();
+
+            // Kiểm tra quyền và ẩn các chức năng không phù hợp
+            ConfigureAccessByRole();
         }
-        
-        private void LoadFormMonHoc()
+
+        // ------------------------- LOAD FORM -------------------------
+        private void LoadChildForm(Type formType)
         {
             try
             {
-                formMonHocInstance = new formMonHoc();
-                ConfigureAndLoadForm(formMonHocInstance);
+                Form instance;
+
+                // Kiểm tra có nằm trong cache chưa
+                if (!_formCache.ContainsKey(formType.FullName))
+                {
+                    instance = (Form)Activator.CreateInstance(formType);
+                    _formCache[formType.FullName] = instance;
+                }
+                else
+                {
+                    instance = _formCache[formType.FullName];
+                }
+
+                ConfigureAndShowForm(instance);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi: " + ex.Message);
+                MessageBox.Show("Lỗi tải form: " + ex.Message);
             }
         }
 
-        private void LoadFormGV()
+        private void ConfigureAndShowForm(Form form)
         {
-            try
-            {
-                formGVInstance = new formGV();
-                ConfigureAndLoadForm(formGVInstance);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi: " + ex.Message);
-            }
-        }
+            form.TopLevel = false;
+            form.FormBorderStyle = FormBorderStyle.None;
+            form.Dock = DockStyle.Fill;
 
-        private void LoadFormPhanCongGV()
-        {
-            try
-            {
-                formPhanCongGVInstance = new formPhanCongGV();
-                ConfigureAndLoadForm(formPhanCongGVInstance);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi: " + ex.Message);
-            }
-        }
-
-        private void LoadFormLopTC()
-        {
-            try
-            {
-                formLopTCInstance = new formLopTC();
-                ConfigureAndLoadForm(formLopTCInstance);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi: " + ex.Message);
-            }
-        }
-
-        private void LoadFormDiem()
-        {
-            try
-            {
-                formDiemInstance = new formDiem();
-                ConfigureAndLoadForm(formDiemInstance);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi: " + ex.Message);
-            }
-        }
-
-        private void LoadFormSV()
-        {
-            try
-            {
-                formSVInstance = new formSV();
-                ConfigureAndLoadForm(formSVInstance);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi: " + ex.Message);
-            }
-        }
-
-        private void ConfigureAndLoadForm(Form formInstance)
-        {
-            formInstance.TopLevel = false;
-            formInstance.FormBorderStyle = FormBorderStyle.None;
-            formInstance.Dock = DockStyle.Fill;
-            
             panelMain.Controls.Clear();
-            panelMain.Controls.Add(formInstance);
-            formInstance.Show();
+            panelMain.Controls.Add(form);
+
+            form.Show();
         }
 
-        private void PanelPhanCongGiangVien_Click(object sender, EventArgs e)
+        // ----------------------- USER INFO --------------------------
+        private void DisplayUserInfo()
         {
-            LoadFormPhanCongGV();
+            lblUserInfo.Text = UserSession.IsLoggedIn
+                ? UserSession.Instance.GetDisplayInfo()
+                : "Chưa đăng nhập";
         }
 
-        private void PanelMonHoc_Click(object sender, EventArgs e)
+private void ConfigureAccessByRole()
+{
+    if (!UserSession.Instance.IsAdmin())
+    {
+        // 1. Ẩn các khối chức năng Admin
+        panelKhoi.Visible = false;  // Khối Giảng viên
+        panelKhoi3.Visible = false; // Khối Phân công
+
+        // 2. Lấy vị trí bắt đầu trám (lấy vị trí cũ của panelKhoi)
+        int currentY = panelKhoi.Location.Y; 
+
+        // 3. Dịch chuyển các panel lên trên
+        
+        // --- Dịch chuyển Lớp Tín Chỉ ---
+        panelKhoi4.Location = new System.Drawing.Point(panelKhoi4.Location.X, currentY);
+        currentY += panelKhoi4.Height;
+
+        // --- Dịch chuyển Môn Học ---
+        panelKhoi5.Location = new System.Drawing.Point(panelKhoi5.Location.X, currentY);
+        currentY += panelKhoi5.Height;
+
+        // --- Dịch chuyển Sinh Viên ---
+        panelKhoi6.Location = new System.Drawing.Point(panelKhoi6.Location.X, currentY);
+        currentY += panelKhoi6.Height;
+
+        // --- KHẮC PHỤC: Dịch chuyển chỉ trắng dưới cùng (panel4) ---
+        // panel4 phải nằm ngay dưới đáy của panelKhoi6
+        panel4.Location = new System.Drawing.Point(panel4.Location.X, currentY);
+    }
+    else
+    {
+        // Nếu là Admin: Hiện lại và Reset về vị trí gốc (theo Designer)
+        panelKhoi.Visible = true;
+        panelKhoi3.Visible = true;
+
+        panelKhoi.Location = new System.Drawing.Point(0, 146);
+        panelKhoi3.Location = new System.Drawing.Point(0, 197);
+        panelKhoi4.Location = new System.Drawing.Point(0, 249);
+        panelKhoi5.Location = new System.Drawing.Point(0, 299);
+        panelKhoi6.Location = new System.Drawing.Point(0, 350);
+        
+        // Reset lại vị trí chỉ trắng panel4
+        panel4.Location = new System.Drawing.Point(0, 401);
+    }
+}
+
+        private void panelSinhVien_Paint(object sender, PaintEventArgs e)
         {
-            LoadFormMonHoc();
+
         }
 
-        private void PanelGiangVien_Click(object sender, EventArgs e)
+        private void label3_Click(object sender, EventArgs e)
         {
-            LoadFormGV();
+
         }
 
-        private void paneLopTC_Click(object sender, EventArgs e)
+        private void label1_Click(object sender, EventArgs e)
         {
-            LoadFormLopTC();
-        }
 
-        private void PanelDiem_Click(object sender, EventArgs e)
-        {
-            LoadFormDiem();
-        }
-
-        private void panelSinhVien_Click(object sender, EventArgs e)
-        {
-            LoadFormSV();
         }
     }
 }

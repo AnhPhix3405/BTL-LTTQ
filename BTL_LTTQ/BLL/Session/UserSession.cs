@@ -1,35 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// UserSession.cs
+using BTL_LTTQ.DTO;
+using System;
 
 namespace BTL_LTTQ.BLL.Session
 {
-    public static class UserSession
+    public class UserSession
     {
-        // Thông tin tài khoản đang đăng nhập
-        public static string MaTK { get; set; } // Mã tài khoản
-        public static string TenDangNhap { get; set; }
-        public static string LoaiTaiKhoan { get; set; }
-        public static string MaGV { get; set; } // Mã giảng viên (nếu có)
-        public static DateTime LoginTime { get; set; }
-
-        // Kiểm tra trạng thái đăng nhập
-        public static bool IsLoggedIn => !string.IsNullOrEmpty(TenDangNhap);
-
-        // Đăng nhập - Lưu thông tin session
-        public static void SetUserSession(string maTK, string tenDangNhap, string loaiTaiKhoan, string maGV = null)
+        private static UserSession _instance;
+        public static UserSession Instance
         {
-            MaTK = maTK;
-            TenDangNhap = tenDangNhap;
-            LoaiTaiKhoan = loaiTaiKhoan;
-            MaGV = maGV;
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new UserSession();
+                }
+                return _instance;
+            }
+        }
+
+        public string MaTK { get; private set; }
+        public string TenDangNhap { get; private set; }
+        public string LoaiTaiKhoan { get; private set; }
+        public string MaGV { get; private set; }
+        public DateTime LoginTime { get; private set; }
+
+        private UserSession() { }
+
+        public void Set(UserInfo user)
+        {
+            MaTK = user.MaTK;
+            TenDangNhap = user.TenDangNhap;
+            LoaiTaiKhoan = user.LoaiTaiKhoan;
+            MaGV = user.MaGV;
             LoginTime = DateTime.Now;
         }
 
-        // Đăng xuất - Xóa thông tin session
-        public static void ClearSession()
+        public void Clear()
         {
             MaTK = null;
             TenDangNhap = null;
@@ -38,41 +45,19 @@ namespace BTL_LTTQ.BLL.Session
             LoginTime = DateTime.MinValue;
         }
 
-        // Kiểm tra quyền admin
-        public static bool IsAdmin()
+        public static bool IsLoggedIn => Instance.TenDangNhap != null;
+        public bool IsAdmin() => LoaiTaiKhoan == "Admin";
+        public bool IsGiangVien() => LoaiTaiKhoan == "Giảng viên";
+
+        public string GetDisplayInfo()
         {
-            return LoaiTaiKhoan == "Admin";
+            return $"Tên đăng nhập: {TenDangNhap}\nLoại tài khoản: {LoaiTaiKhoan}";
+            // return $"Tên đăng nhập: {TenDangNhap}, Loại tài khoản: {LoaiTaiKhoan}";
         }
 
-        // Kiểm tra quyền giảng viên
-        public static bool IsGiangVien()
+        public static string GetDisplayInfoStatic()
         {
-            return LoaiTaiKhoan == "Giảng viên";
-        }
-
-        // Lấy thông tin hiển thị
-        public static string GetDisplayInfo()
-        {
-            if (IsLoggedIn)
-                return $"Xin chào: {TenDangNhap} ({LoaiTaiKhoan})";
-            return "Chưa đăng nhập";
-        }
-
-        // Lấy thời gian đăng nhập
-        public static string GetLoginTimeInfo()
-        {
-            if (IsLoggedIn)
-                return $"Đăng nhập lúc: {LoginTime:dd/MM/yyyy HH:mm:ss}";
-            return "";
-        }
-
-        // Kiểm tra session có hết hạn không (ví dụ: 8 tiếng)
-        public static bool IsSessionExpired(int hoursLimit = 8)
-        {
-            if (!IsLoggedIn) return true;
-            
-            TimeSpan timeDifference = DateTime.Now - LoginTime;
-            return timeDifference.TotalHours > hoursLimit;
+            return Instance.GetDisplayInfo();
         }
     }
 }

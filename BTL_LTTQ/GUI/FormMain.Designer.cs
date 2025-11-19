@@ -68,6 +68,7 @@
             this.panelKhoi3 = new System.Windows.Forms.Panel();
             this.panelPhanCongGiangVien = new System.Windows.Forms.Panel();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.lblUserInfo = new System.Windows.Forms.Label();
             this.panelMain = new System.Windows.Forms.Panel();
             this.panelKhoi2.SuspendLayout();
             this.panelDiem.SuspendLayout();
@@ -195,7 +196,8 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(147, 31);
             this.label1.TabIndex = 1;
-            this.label1.Text = "Giảng Viên";
+            this.label1.Text = "Giang Vien";
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // pictureBox1
             // 
@@ -281,14 +283,15 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F);
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 16F);
             this.label3.ForeColor = System.Drawing.Color.White;
             this.label3.Location = new System.Drawing.Point(72, 12);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(204, 24);
+            this.label3.Size = new System.Drawing.Size(195, 31);
             this.label3.TabIndex = 1;
-            this.label3.Text = "Phân Công Giảng Viên";
+            this.label3.Text = "Phân Công GV";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // panel1
             // 
@@ -297,10 +300,11 @@
             this.panel1.Controls.Add(this.panelKhoi6);
             this.panel1.Controls.Add(this.panelKhoi5);
             this.panel1.Controls.Add(this.panelKhoi4);
-            this.panel1.Controls.Add(this.panelKhoi3);
             this.panel1.Controls.Add(this.panelKhoi2);
-            this.panel1.Controls.Add(this.panelKhoi);
             this.panel1.Controls.Add(this.panel3);
+            this.panel1.Controls.Add(this.panelKhoi3);
+            this.panel1.Controls.Add(this.panelKhoi);
+            this.panel1.Controls.Add(this.lblUserInfo);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(4);
@@ -338,6 +342,7 @@
             this.panelSinhVien.Name = "panelSinhVien";
             this.panelSinhVien.Size = new System.Drawing.Size(309, 49);
             this.panelSinhVien.TabIndex = 3;
+            this.panelSinhVien.Paint += new System.Windows.Forms.PaintEventHandler(this.panelSinhVien_Paint);
             // 
             // label6
             // 
@@ -519,6 +524,17 @@
             this.pictureBox3.TabIndex = 0;
             this.pictureBox3.TabStop = false;
             // 
+            // lblUserInfo
+            // 
+            this.lblUserInfo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblUserInfo.ForeColor = System.Drawing.Color.White;
+            this.lblUserInfo.Location = new System.Drawing.Point(15, 405);
+            this.lblUserInfo.Name = "lblUserInfo";
+            this.lblUserInfo.Size = new System.Drawing.Size(280, 40);
+            this.lblUserInfo.TabIndex = 13;
+            this.lblUserInfo.Text = "Xin chào: Username\nAdmin";
+            this.lblUserInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // panelMain
             // 
             this.panelMain.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -611,5 +627,6 @@
         private System.Windows.Forms.Panel panelPhanCongGiangVien;
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.Panel panelMain;
+        private System.Windows.Forms.Label lblUserInfo;
     }
 }
