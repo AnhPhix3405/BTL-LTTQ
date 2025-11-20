@@ -74,6 +74,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.tbMaGV = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnXuatExcel = new System.Windows.Forms.Button();
             this.btnThem.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.btnRefresh.SuspendLayout();
@@ -140,10 +141,10 @@
             // 
             this.cbbMaKhoa.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbbMaKhoa.FormattingEnabled = true;
-            this.cbbMaKhoa.Location = new System.Drawing.Point(1160, 75);
+            this.cbbMaKhoa.Location = new System.Drawing.Point(1081, 73);
             this.cbbMaKhoa.Margin = new System.Windows.Forms.Padding(4);
             this.cbbMaKhoa.Name = "cbbMaKhoa";
-            this.cbbMaKhoa.Size = new System.Drawing.Size(208, 28);
+            this.cbbMaKhoa.Size = new System.Drawing.Size(245, 28);
             this.cbbMaKhoa.TabIndex = 26;
             // 
             // label16
@@ -613,11 +614,28 @@
             this.label1.TabIndex = 7;
             this.label1.Text = "Quản lý Giảng Viên";
             // 
+            // btnXuatExcel
+            // 
+            this.btnXuatExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(167)))), ((int)(((byte)(69)))));
+            this.btnXuatExcel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnXuatExcel.FlatAppearance.BorderSize = 0;
+            this.btnXuatExcel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnXuatExcel.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnXuatExcel.ForeColor = System.Drawing.Color.White;
+            this.btnXuatExcel.Location = new System.Drawing.Point(1140, 81);
+            this.btnXuatExcel.Margin = new System.Windows.Forms.Padding(4);
+            this.btnXuatExcel.Name = "btnXuatExcel";
+            this.btnXuatExcel.Size = new System.Drawing.Size(200, 35);
+            this.btnXuatExcel.TabIndex = 12;
+            this.btnXuatExcel.Text = "📊 Xuất Excel";
+            this.btnXuatExcel.UseVisualStyleBackColor = false;
+            // 
             // formGV
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1469, 688);
+            this.Controls.Add(this.btnXuatExcel);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.dgvSV);
             this.Controls.Add(this.label6);
@@ -698,5 +716,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox tbMaGV;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnXuatExcel;
     }
 }

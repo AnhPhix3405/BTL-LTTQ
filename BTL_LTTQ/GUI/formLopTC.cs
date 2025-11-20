@@ -8,6 +8,9 @@ using System.Windows.Forms;
 using BTL_LTTQ.BLL;
 using BTL_LTTQ.DTO;
 using BTL_LTTQ.DAL;
+using System.IO;
+using System.Text;
+using System.Linq;
 
 namespace BTL_LTTQ
 {
@@ -122,6 +125,98 @@ namespace BTL_LTTQ
             // ĐÃ THÊM: Thêm sự kiện để format cột BIT (0/1)
             // Đây chính là code sửa lỗi FormatException trong ảnh của bạn
             dgvSV.CellFormatting += new DataGridViewCellFormattingEventHandler(dgvSV_CellFormatting);
+            btnXuatExcel.Click += new EventHandler(btnXuatExcel_Click);
+        }
+
+        private void btnXuatExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvSV.Rows.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu lớp tín chỉ để xuất!", "Thông báo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.Filter = "Excel Files (*.csv)|*.csv|All Files (*.*)|*.*";
+                sfd.FileName = $"DanhSach_LopTC_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                sfd.Title = "Lưu file Excel";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    ExportToCSV_LTC(sfd.FileName); // Gọi hàm export
+
+                    MessageBox.Show($"✅ XUẤT FILE THÀNH CÔNG!\n\nĐường dẫn: {sfd.FileName}",
+                        "Xuất Excel thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất file: {ex.Message}", "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ExportToCSV_LTC(string filePath)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            // Sử dụng StreamWriter với Encoding.UTF8
+            using (StreamWriter sw = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                sb.AppendLine("DANH SÁCH LỚP TÍN CHỈ");
+                sb.AppendLine($"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+                sb.AppendLine();
+
+                // Ghi header các cột (chỉ các cột hiển thị)
+                var headers = dgvSV.Columns.Cast<DataGridViewColumn>()
+                    .Where(c => c.Visible)
+                    .Select(c => EscapeCSV(c.HeaderText));
+                sb.AppendLine(string.Join(",", headers));
+
+                // Ghi dữ liệu từng dòng
+                foreach (DataGridViewRow row in dgvSV.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    var cells = dgvSV.Columns.Cast<DataGridViewColumn>()
+                        .Where(c => c.Visible)
+                        .Select(c =>
+                        {
+                            var cellValue = row.Cells[c.Index].Value;
+
+                            // ✅ Xử lý cột TinhTrangLop (đã được format)
+                            if (c.Name == "TinhTrangLop")
+                            {
+                                // Lấy giá trị đã được format từ sự kiện CellFormatting
+                                return EscapeCSV(row.Cells[c.Index].FormattedValue?.ToString() ?? "Chưa phân công");
+                            }
+
+                            return EscapeCSV(cellValue?.ToString() ?? "");
+                        });
+
+                    sb.AppendLine(string.Join(",", cells));
+                }
+
+                sw.Write(sb.ToString());
+            }
+        }
+
+        // Tái sử dụng hàm EscapeCSV (thường được đặt trong một lớp tiện ích chung)
+        private string EscapeCSV(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return "\"\"";
+
+            if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+            {
+                value = value.Replace("\"", "\"\"");
+                return $"\"{value}\"";
+            }
+
+            return value;
         }
 
         #endregion
@@ -142,7 +237,7 @@ namespace BTL_LTTQ
                 dgvSV.Columns["HocKy"].HeaderText = "Học Kỳ";
                 dgvSV.Columns["NamHoc"].HeaderText = "Năm Học";
                 // ĐÃ SỬA: Đổi tên cột
-                
+
             }
             catch (Exception ex)
             {
@@ -496,8 +591,8 @@ namespace BTL_LTTQ
 
                 // ĐÃ SỬA: Xóa logic gán cho Tình Trạng
                 // vì control không còn trên form
+                tbMaLop.ReadOnly = true;
 
-              
             }
         }
 

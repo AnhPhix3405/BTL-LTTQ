@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using BTL_LTTQ.BLL; // Thêm BLL
 using BTL_LTTQ.DTO; // Thêm DTO
 using System.Data.SqlClient; // Cần giữ lại để bắt SqlException
+using System.IO;
+using System.Text;
+using System.Linq;
 
 // namespace BTL_LTTQ (Nếu file ở gốc)
 namespace BTL_LTTQ // (Nếu file ở trong thư mục GUI)
@@ -52,6 +55,95 @@ namespace BTL_LTTQ // (Nếu file ở trong thư mục GUI)
             tbTimKiemTheoTen.Leave += new EventHandler(tbTimKiemTheoTen_Leave);
             tbNgaysinh.Enter += new EventHandler(tbNgaysinh_Enter);
             tbNgaysinh.Leave += new EventHandler(tbNgaysinh_Leave);
+            btnXuatExcel.Click += new EventHandler(btnXuatExcel_Click);
+        }
+
+        private void btnXuatExcel_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvSV.Rows.Count == 0)
+                {
+                    MessageBox.Show("Không có dữ liệu giảng viên để xuất!", "Thông báo",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.Filter = "Excel Files (*.csv)|*.csv|All Files (*.*)|*.*";
+                sfd.FileName = $"DanhSach_GiangVien_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                sfd.Title = "Lưu file Excel";
+
+                if (sfd.ShowDialog() == DialogResult.OK)
+                {
+                    ExportToCSV_GV(sfd.FileName); // Gọi hàm export
+
+                    MessageBox.Show($"✅ XUẤT FILE THÀNH CÔNG!\n\nĐường dẫn: {sfd.FileName}",
+                        "Xuất Excel thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Lỗi khi xuất file: {ex.Message}", "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ExportToCSV_GV(string filePath)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            // Sử dụng StreamWriter với Encoding.UTF8 để hỗ trợ Tiếng Việt trong Excel
+            using (StreamWriter sw = new StreamWriter(filePath, false, Encoding.UTF8))
+            {
+                sb.AppendLine("DANH SÁCH GIẢNG VIÊN");
+                sb.AppendLine($"Ngày xuất: {DateTime.Now:dd/MM/yyyy HH:mm:ss}");
+                sb.AppendLine();
+
+                // Ghi header các cột (chỉ các cột hiển thị)
+                var headers = dgvSV.Columns.Cast<DataGridViewColumn>()
+                    .Where(c => c.Visible)
+                    .Select(c => EscapeCSV(c.HeaderText));
+                sb.AppendLine(string.Join(",", headers));
+
+                // Ghi dữ liệu từng dòng
+                foreach (DataGridViewRow row in dgvSV.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    var cells = dgvSV.Columns.Cast<DataGridViewColumn>()
+                        .Where(c => c.Visible)
+                        .Select(c =>
+                        {
+                            var cellValue = row.Cells[c.Index].Value;
+
+                            // Format ngày sinh
+                            if (cellValue is DateTime dt)
+                                return EscapeCSV(dt.ToString("dd/MM/yyyy"));
+
+                            return EscapeCSV(cellValue?.ToString() ?? "");
+                        });
+
+                    sb.AppendLine(string.Join(",", cells));
+                }
+
+                sw.Write(sb.ToString());
+            }
+        }
+
+        // Tái sử dụng hàm EscapeCSV từ formPhanCongGV
+        private string EscapeCSV(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return "\"\"";
+
+            if (value.Contains(",") || value.Contains("\"") || value.Contains("\n"))
+            {
+                value = value.Replace("\"", "\"\"");
+                return $"\"{value}\"";
+            }
+
+            return value;
         }
 
         #endregion
