@@ -197,6 +197,9 @@
     <EmbeddedResource Include="GUI\formMonHoc.resx">
       <DependentUpon>formMonHoc.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GUI\formPhanCongGV.resx">
+      <DependentUpon>formPhanCongGV.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GUI\formSV.resx">
       <DependentUpon>formSV.cs</DependentUpon>
     </EmbeddedResource>
