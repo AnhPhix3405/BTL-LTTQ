@@ -1,11 +1,12 @@
 ﻿
-
+create database QL_GiangDay
+use QL_GiangDay
 -- 1. Khoa (Tạo trước vì các bảng khác tham chiếu)
 CREATE TABLE Khoa (
     MaKhoa VARCHAR(10) PRIMARY KEY,
     TenKhoa NVARCHAR(100) NOT NULL
 );
-
+go
 -- 2. Môn Học (Tham chiếu Khoa)
 CREATE TABLE MonHoc (
     MaMH VARCHAR(10) PRIMARY KEY,
@@ -18,7 +19,7 @@ CREATE TABLE MonHoc (
     MaKhoa VARCHAR(10),
     FOREIGN KEY (MaKhoa) REFERENCES Khoa(MaKhoa)
 );
-
+go
 -- 3. Giảng Viên (Tham chiếu Khoa)
 CREATE TABLE GiangVien (
     MaGV VARCHAR(10) PRIMARY KEY,
@@ -35,7 +36,7 @@ CREATE TABLE GiangVien (
     Email VARCHAR(100) NULL,
     FOREIGN KEY (MaKhoa) REFERENCES Khoa(MaKhoa)
 );
-
+go
 -- 4. Sinh Viên (Tham chiếu Khoa)
 CREATE TABLE SinhVien (
     MaSV VARCHAR(10) PRIMARY KEY,
@@ -49,7 +50,7 @@ CREATE TABLE SinhVien (
     MaKhoa VARCHAR(10),
     FOREIGN KEY (MaKhoa) REFERENCES Khoa(MaKhoa)
 );
-
+go
 -- 11. Bảng Học Kỳ (Tạo trước)
 -- Bảng này có khóa chính (HocKy, NamHoc) kiểu INT
 -- để khớp chính xác với form của bạn.
@@ -82,7 +83,7 @@ CREATE TABLE LopTinChi (
     FOREIGN KEY (MaMH) REFERENCES MonHoc(MaMH), -- Đã thêm dấu phẩy
     FOREIGN KEY (HocKy, NamHoc) REFERENCES HocKy(HocKy, NamHoc) -- Đã sửa lỗi cú pháp
 );
-
+go
 -- 6. Tài Khoản (Tham chiếu Giảng Viên)
 CREATE TABLE TaiKhoan (
     MaTK VARCHAR(10) PRIMARY KEY,
@@ -92,13 +93,13 @@ CREATE TABLE TaiKhoan (
     MaGV VARCHAR(10),
     FOREIGN KEY (MaGV) REFERENCES GiangVien(MaGV)
 );
-
+go
 -- 7. Khu Vực
 CREATE TABLE KhuVuc (
     MaKhuVuc VARCHAR(10) PRIMARY KEY,
     TenKhuVuc NVARCHAR(50) NOT NULL
 );
-
+go
 -- 8. Phòng học
 CREATE TABLE PhongHoc (
     MaPhong VARCHAR(20) PRIMARY KEY,  -- Ví dụ: A1-101, B-204, C-301
@@ -106,7 +107,7 @@ CREATE TABLE PhongHoc (
     CONSTRAINT FK_PhongHoc_KhuVuc FOREIGN KEY (MaKhuVuc)
         REFERENCES KhuVuc(MaKhuVuc) ON DELETE CASCADE
 );
-
+go
 -- 9. Phân công giảng dạy (Tham chiếu GV, Khoa, Lớp TC)
 CREATE TABLE PhanCongGiangDay (
     MaPC VARCHAR(10) PRIMARY KEY,
@@ -128,7 +129,7 @@ CREATE TABLE PhanCongGiangDay (
     CONSTRAINT CK_PhanCong_CaHoc CHECK (CaHoc BETWEEN 1 AND 5),
     CONSTRAINT CK_PhanCong_Thu CHECK (Thu BETWEEN 2 AND 8)
 );
-
+go
 -- 10. Điểm (Tham chiếu Sinh Viên, Lớp TC)
 CREATE TABLE Diem (
     MaSV VARCHAR(10),
@@ -142,7 +143,7 @@ CREATE TABLE Diem (
     FOREIGN KEY (MaSV) REFERENCES SinhVien(MaSV),
     FOREIGN KEY (MaLop) REFERENCES LopTinChi(MaLop)
 );
-
+go
 -- ********************************************
 -- 3. CHÈN DỮ LIỆU MẪU (SAMPLE DATA)
 -- ********************************************
@@ -214,3 +215,65 @@ INSERT INTO TaiKhoan (MaTK, TenDangNhap, MatKhau, LoaiTaiKhoan, MaGV) VALUES
 ('TKADM', 'admin', 'passadmin', N'Admin', NULL),
 ('TK001', 'nguyenvana', 'matkhau123', N'Giảng viên', 'GV001'),
 ('TK002', 'tranthib', 'matkhau456', N'Giảng viên', 'GV002');
+
+INSERT INTO MonHoc (MaMH, TenMH, SoTC, SoTietLT, SoTietTH, HeSoDQT, HeSoThi, MaKhoa) VALUES
+('MH004', N'Cấu trúc dữ liệu & GT', 3, 30, 15, 0.4, 0.6, 'CNTT'),
+('MH005', N'Mạng máy tính', 3, 30, 15, 0.3, 0.7, 'CNTT'),
+('MH006', N'Trí tuệ nhân tạo', 3, 30, 15, 0.4, 0.6, 'CNTT'),
+('MH007', N'An toàn thông tin', 2, 30, 0, 0.5, 0.5, 'CNTT');
+
+--thêm data
+
+USE QL_GiangDay
+GO
+
+-- =============================================
+-- BƯỚC 1: THÊM MÔN HỌC TRƯỚC (BẮT BUỘC CÓ TRƯỚC)
+-- =============================================
+IF NOT EXISTS (SELECT * FROM MonHoc WHERE MaMH = 'MH004')
+    INSERT INTO MonHoc (MaMH, TenMH, SoTC, SoTietLT, SoTietTH, HeSoDQT, HeSoThi, MaKhoa) VALUES ('MH004', N'Cấu trúc dữ liệu & GT', 3, 30, 15, 0.4, 0.6, 'CNTT');
+
+IF NOT EXISTS (SELECT * FROM MonHoc WHERE MaMH = 'MH005')
+    INSERT INTO MonHoc (MaMH, TenMH, SoTC, SoTietLT, SoTietTH, HeSoDQT, HeSoThi, MaKhoa) VALUES ('MH005', N'Mạng máy tính', 3, 30, 15, 0.3, 0.7, 'CNTT');
+
+IF NOT EXISTS (SELECT * FROM MonHoc WHERE MaMH = 'MH006')
+    INSERT INTO MonHoc (MaMH, TenMH, SoTC, SoTietLT, SoTietTH, HeSoDQT, HeSoThi, MaKhoa) VALUES ('MH006', N'Trí tuệ nhân tạo', 3, 30, 15, 0.4, 0.6, 'CNTT');
+
+IF NOT EXISTS (SELECT * FROM MonHoc WHERE MaMH = 'MH007')
+    INSERT INTO MonHoc (MaMH, TenMH, SoTC, SoTietLT, SoTietTH, HeSoDQT, HeSoThi, MaKhoa) VALUES ('MH007', N'An toàn thông tin', 2, 30, 0, 0.5, 0.5, 'CNTT');
+GO
+
+-- =============================================
+-- BƯỚC 2: THÊM LỚP TÍN CHỈ (KHI ĐÃ CÓ MÔN HỌC)
+-- =============================================
+IF NOT EXISTS (SELECT * FROM LopTinChi WHERE MaLop = 'LTC004')
+    INSERT INTO LopTinChi (MaLop, NamHoc, MaMH, TinhTrangLop, HocKy) VALUES ('LTC004', 2025, 'MH004', 1, 1);
+
+IF NOT EXISTS (SELECT * FROM LopTinChi WHERE MaLop = 'LTC005')
+    INSERT INTO LopTinChi (MaLop, NamHoc, MaMH, TinhTrangLop, HocKy) VALUES ('LTC005', 2025, 'MH005', 1, 1);
+
+IF NOT EXISTS (SELECT * FROM LopTinChi WHERE MaLop = 'LTC006')
+    INSERT INTO LopTinChi (MaLop, NamHoc, MaMH, TinhTrangLop, HocKy) VALUES ('LTC006', 2025, 'MH006', 1, 1);
+
+IF NOT EXISTS (SELECT * FROM LopTinChi WHERE MaLop = 'LTC007')
+    INSERT INTO LopTinChi (MaLop, NamHoc, MaMH, TinhTrangLop, HocKy) VALUES ('LTC007', 2025, 'MH007', 1, 1);
+GO
+
+-- =============================================
+-- BƯỚC 3: PHÂN CÔNG GIẢNG DẠY (KHI ĐÃ CÓ LỚP VÀ GIẢNG VIÊN)
+-- =============================================
+-- Xóa dữ liệu phân công cũ nếu lỡ trùng ID để tránh lỗi, sau đó thêm mới
+DELETE FROM PhanCongGiangDay WHERE MaPC IN ('PC003', 'PC004', 'PC005', 'PC006', 'PC007');
+
+INSERT INTO PhanCongGiangDay (MaPC, NgayPC, NgayBatDau, NgayKetThuc, CaHoc, Thu, MaPhong, MaGV, MaLop) VALUES
+-- Thứ 3, Ca 2
+('PC003', '2025-08-20', '2025-09-05', '2025-12-31', 2, 3, 'B101', 'GV001', 'LTC004'),
+-- Thứ 4, Ca 3
+('PC004', '2025-08-20', '2025-09-05', '2025-12-31', 3, 4, 'C205', 'GV001', 'LTC005'),
+-- Thứ 5, Ca 1
+('PC005', '2025-08-20', '2025-09-05', '2025-12-31', 1, 5, 'A101', 'GV001', 'LTC006'),
+-- Thứ 6, Ca 4
+('PC006', '2025-08-20', '2025-09-05', '2025-12-31', 4, 6, 'B101', 'GV001', 'LTC007'),
+-- Thứ 7, Ca 5
+('PC007', '2025-08-20', '2025-09-05', '2025-12-31', 5, 7, 'C205', 'GV001', 'LTC004');
+GO
