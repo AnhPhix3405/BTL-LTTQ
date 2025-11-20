@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BTL_LTTQ.BLL.Diem; // Import BLL
 using BTL_LTTQ.DTO;       // Import DTO
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace BTL_LTTQ
 {
@@ -32,6 +33,8 @@ namespace BTL_LTTQ
             btnTimKiem.Click += BtnTim_Click;
             btnTatCa.Click += BtnTatCa_Click;
             dgvDiem.CellClick += DataGridView1_CellClick;
+            btnXuatExcel.Click += BtnXuatExcel_Click;
+
         }
 
         // ----------------------------------------------------------------------
@@ -95,12 +98,45 @@ namespace BTL_LTTQ
             txtDiemThi.Text = "0";
             txtMaLop.Focus();
         }
+        
 
-        // ----------------------------------------------------------------------
-        // CÁC SỰ KIỆN CLICK NÚT
-        // ----------------------------------------------------------------------
+        private void XuatRaExcel(DataGridView dgv)
+            {
+                try
+                {
+                    // Tạo ứng dụng Excel
+                    Excel.Application excelApp = new Excel.Application();
+                    excelApp.Application.Workbooks.Add(Type.Missing);
 
-        private void BtnLamMoi_Click(object sender, EventArgs e)
+                    // Đặt tiêu đề cột
+                    for (int i = 1; i <= dgv.Columns.Count; i++)
+                    {
+                        excelApp.Cells[1, i] = dgv.Columns[i - 1].HeaderText;
+                    }
+
+                    // Ghi dữ liệu từng dòng
+                    for (int i = 0; i < dgv.Rows.Count; i++)
+                    {
+                        for (int j = 0; j < dgv.Columns.Count; j++)
+                        {
+                            excelApp.Cells[i + 2, j + 1] = dgv.Rows[i].Cells[j].Value?.ToString();
+                        }
+                    }
+
+                    // Hiện file Excel lên màn hình
+                    excelApp.Visible = true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Lỗi xuất Excel: " + ex.Message);
+                }
+            }
+
+    // ----------------------------------------------------------------------
+    // CÁC SỰ KIỆN CLICK NÚT
+    // ----------------------------------------------------------------------
+
+    private void BtnLamMoi_Click(object sender, EventArgs e)
         {
             ClearInputs();
         }
@@ -185,7 +221,17 @@ namespace BTL_LTTQ
 
         private void BtnTatCa_Click(object sender, EventArgs e)
         {
-            LoadData(); // Load lại toàn bộ dữ liệu
+            LoadData();
+        }
+        private void BtnXuatExcel_Click(object sender, EventArgs e)
+        {
+            if (dgvDiem.Rows.Count == 0)
+            {
+                MessageBox.Show("Không có dữ liệu để xuất.");
+                return;
+            }
+
+            XuatRaExcel(dgvDiem);
         }
 
         // ----------------------------------------------------------------------
@@ -207,7 +253,5 @@ namespace BTL_LTTQ
                 txtDiemThi.Text = row.Cells["DiemThi"].Value.ToString();
             }
         }
-
-      
     }
 }

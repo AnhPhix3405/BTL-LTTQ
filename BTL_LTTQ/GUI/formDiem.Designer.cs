@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(formDiem));
             this.label2 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.btnXuatExcel = new System.Windows.Forms.Button();
             this.txtTimKiemTheoMaSV = new System.Windows.Forms.TextBox();
             this.btnTatCa = new System.Windows.Forms.Button();
             this.btnTimKiem = new System.Windows.Forms.Button();
@@ -89,6 +90,7 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.btnXuatExcel);
             this.panel1.Controls.Add(this.txtTimKiemTheoMaSV);
             this.panel1.Controls.Add(this.btnTatCa);
             this.panel1.Controls.Add(this.btnTimKiem);
@@ -96,8 +98,22 @@
             this.panel1.Location = new System.Drawing.Point(418, 62);
             this.panel1.Margin = new System.Windows.Forms.Padding(4);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(854, 71);
+            this.panel1.Size = new System.Drawing.Size(1005, 71);
             this.panel1.TabIndex = 8;
+            // 
+            // btnXuatExcel
+            // 
+            this.btnXuatExcel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
+            this.btnXuatExcel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnXuatExcel.ForeColor = System.Drawing.SystemColors.Info;
+            this.btnXuatExcel.Location = new System.Drawing.Point(850, 17);
+            this.btnXuatExcel.Margin = new System.Windows.Forms.Padding(4);
+            this.btnXuatExcel.Name = "btnXuatExcel";
+            this.btnXuatExcel.Size = new System.Drawing.Size(116, 43);
+            this.btnXuatExcel.TabIndex = 8;
+            this.btnXuatExcel.Text = "Xuất Excel";
+            this.btnXuatExcel.UseVisualStyleBackColor = false;
+            this.btnXuatExcel.Click += new System.EventHandler(this.BtnXuatExcel_Click);
             // 
             // txtTimKiemTheoMaSV
             // 
@@ -122,6 +138,7 @@
             this.btnTatCa.TabIndex = 6;
             this.btnTatCa.Text = "Tất Cả";
             this.btnTatCa.UseVisualStyleBackColor = false;
+            this.btnTatCa.Click += new System.EventHandler(this.BtnTatCa_Click);
             // 
             // btnTimKiem
             // 
@@ -544,5 +561,6 @@
         private System.Windows.Forms.Label lable21;
         private System.Windows.Forms.TextBox txtTenSV;
         private System.Windows.Forms.TextBox txtTimKiemTheoMaSV;
+        private System.Windows.Forms.Button btnXuatExcel;
     }
 }
